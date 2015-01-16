@@ -64,8 +64,8 @@
 - name:  Install zookeeper
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   with_items: 
-    - zookeeper
-    - zookeeper-server 
+    - zookeeper=3.4.5+cdh5.3.0+81-1.cdh5.3.0.p0.36~trusty-cdh5.3.0
+    - zookeeper-server=3.4.5+cdh5.3.0+81-1.cdh5.3.0.p0.36~trusty-cdh5.3.0
 
 - name:  Initialize zookeeper
   command: service zookeeper-server init creates=/var/lib/zookeeper/version-2
