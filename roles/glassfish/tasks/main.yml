@@ -6,7 +6,7 @@
   apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=3600
   with_items:
     - postgresql-client-common
-    - postgresql-client-9.1
+    - postgresql-client-9.3
 
 
 - name:  Download Glassfish, war, and sample database
@@ -41,7 +41,7 @@
 - name:  Download postgres jar
   get_url: url={{ item.url }} dest={{ item.dest }} 
   with_items:
-     - { url: 'http://jdbc.postgresql.org/download/postgresql-9.1-903.jdbc4.jar', dest: '~ubuntu/glassfish3/glassfish/domains/domain1/lib' }
+     - { url: 'http://jdbc.postgresql.org/download/postgresql-9.3-1102.jdbc4.jar', dest: '~ubuntu/glassfish3/glassfish/domains/domain1/lib' }
   
 - name: Change glassfish port
   lineinfile: 
