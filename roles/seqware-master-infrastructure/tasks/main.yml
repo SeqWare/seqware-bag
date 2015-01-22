@@ -226,7 +226,7 @@
 - name:  Download Oozie-SGE 
   get_url: url={{ item.url }} dest=/var/lib/oozie/webapps/oozie/WEB-INF/lib mode=0555
   with_items:
-     - { url: 'http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.2/oozie-sge-1.0.2.jar' }
+     - { url: 'http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.1/oozie-sge-1.1.jar' }
      - { url: 'http://repo1.maven.org/maven2/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar' }
   notify: restart oozie
 
