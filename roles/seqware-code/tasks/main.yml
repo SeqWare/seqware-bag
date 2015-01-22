@@ -69,7 +69,7 @@
   lineinfile: 
     dest: ~{{ user_name }}/.bash_profile
     create: yes
-    line: 'export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=512m"'
+    line: 'export MAVEN_OPTS="-Xmx1024m"'
     state: present
     insertafter: EOF
     owner: "{{ user_name }}"

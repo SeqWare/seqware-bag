@@ -1,6 +1,11 @@
 ---
 # file: roles/seqware-master-infrastructure/tasks/main.yml
 
+- name:  Setup cloudera preference
+  copy: 
+    src: cloudera.pref
+    dest: /etc/apt/preferences.d/cloudera.pref
+
 - name:  Install Hadoop for a master
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   register: oozie_installed
@@ -64,8 +69,8 @@
 - name:  Install zookeeper
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   with_items: 
-    - zookeeper=3.4.5+cdh5.3.0+81-1.cdh5.3.0.p0.36~trusty-cdh5.3.0
-    - zookeeper-server=3.4.5+cdh5.3.0+81-1.cdh5.3.0.p0.36~trusty-cdh5.3.0
+    - zookeeper
+    - zookeeper-server
 
 - name:  Initialize zookeeper
   command: service zookeeper-server init creates=/var/lib/zookeeper/version-2
@@ -147,8 +152,9 @@
     - hadoop fs -mkdir -p /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
     - hadoop fs -chmod 1777 /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
     - hadoop fs -chown -R mapred /var/lib/hadoop-hdfs/cache/mapred
+    - hadoop fs -mkdir /tmp/mapred
     - hadoop fs -mkdir /tmp/mapred/system
-    - hadoop fs -chown mapred:hadoop /tmp/mapred/system
+    - hadoop fs -chown -R mapred:hadoop /tmp/mapred
     - hadoop fs -mkdir -p /tmp/hadoop-mapred/mapred
     - hadoop fs -chmod -R a+wrx /tmp/hadoop-mapred/mapred
   
@@ -176,41 +182,31 @@
     - wget -q http://extjs.com/deploy/ext-2.2.zip
     - unzip ext-2.2.zip
     - mv ext-2.2 /var/lib/oozie/
-    
-- name:  Oozie started for variable registration 
-  service: name=oozie state=started
-
-- name:  Register Oozie SGE Home Dir
-  shell: 'ps -fww -u oozie | grep -oE "\-Doozie\.home\.dir=\S+" | grep -oE "/\S+"'
-  register: oozie_home_dir
-  changed_when: False
-  
-- name:  Register Oozie SGE Conf Dir
-  shell: 'ps -fww -u oozie | grep -oE "\-Doozie\.config\.dir=\S+" | grep -oE "/\S+"'
-  register: oozie_conf_dir
-  changed_when: False
 
 - name:  Register qsub path
   command: which qsub
   register: qsub_path
   changed_when: False
   
-- name:  Copy Oozie Config
-  copy: 
-    src: oozie-site.xml
-    dest: '{{ oozie_conf_dir.stdout }}/oozie-site.xml'
-  notify: restart oozie
-  
 - name: Copy Oozie Env (Set memory)
   copy:
     src: oozie-env.sh
-    dest: '{{ oozie_conf_dir.stdout }}/oozie-env.sh'
+    dest: '/etc/oozie/conf/oozie-env.sh'
+  notify: restart oozie
+  
+- name: Ensure Oozie tomcat config directory exists
+  file: path=/var/lib/oozie/tomcat-deployment/conf owner=oozie group=oozie mode=0755 state=directory
+  
+- name: Copy Oozie tomcat config
+  copy:
+    src: server.xml
+    dest: /var/lib/oozie/tomcat-deployment/conf/server.xml
   notify: restart oozie
   
 - name: Copy Oozie Log4j
   copy:
     src: oozie-log4j.properties
-    dest: '{{ oozie_conf_dir.stdout }}/oozie-log4j.properties'
+    dest: /etc/oozie/conf/oozie-log4j.properties
   notify: restart oozie
   
   # need to figure out how to refactor this cleanly
@@ -225,10 +221,10 @@
   shell: sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
 
 - name:  Create Oozie web dir
-  file: state=directory path={{ oozie_home_dir.stdout }}/webapps/oozie/WEB-INF/lib 
+  file: state=directory path=/var/lib/oozie/webapps/oozie/WEB-INF/lib 
   
 - name:  Download Oozie-SGE 
-  get_url: url={{ item.url }} dest={{ oozie_home_dir.stdout }}/webapps/oozie/WEB-INF/lib mode=0555
+  get_url: url={{ item.url }} dest=/var/lib/oozie/webapps/oozie/WEB-INF/lib mode=0555
   with_items:
      - { url: 'http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.2/oozie-sge-1.0.2.jar' }
      - { url: 'http://repo1.maven.org/maven2/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar' }
@@ -236,7 +232,7 @@
 
 - name:  Oozie SGE Logging
   lineinfile: 
-    dest: '{{ oozie_conf_dir.stdout }}/oozie-log4j.properties'
+    dest: '/etc/oozie/conf/oozie-log4j.properties'
     create: no
     line: log4j.logger.io.seqware.oozie.action.sge=DEBUG, oozie
     state: present
@@ -290,7 +286,7 @@
   when: nfs_setup.changed
   
 - name:  NFS Restart
-  service: name=portmap state=restarted
+  service: name=rpcbind state=restarted
   when: nfs_setup.changed
   
 - name:  NFS Restart
