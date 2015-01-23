@@ -16,8 +16,9 @@
   when: create_user
 
 - name:  Set up SeqWare working directories
-  file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }}
+  file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }} recurse=yes
   with_items:
+     - { state: 'directory', path: '~{{ user_name }}', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
      - { state: 'directory', path: '~{{ user_name }}/bin', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
      - { state: 'directory', path: '~{{ user_name }}/jars', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
      - { state: 'directory', path: '~{{ user_name }}/crons', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
