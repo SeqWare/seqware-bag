@@ -191,11 +191,17 @@
 - name: Copy Oozie Env (Set memory)
   copy:
     src: oozie-env.sh
-    dest: '/etc/oozie/conf/oozie-env.sh'
+    dest: /etc/oozie/conf/oozie-env.sh
   notify: restart oozie
   
 - name: Ensure Oozie tomcat config directory exists
   file: path=/var/lib/oozie/tomcat-deployment/conf owner=oozie group=oozie mode=0755 state=directory
+
+- name: Copy Oozie config
+  copy:
+    src: oozie-site.xml
+    dest: /etc/oozie/conf/server.xml
+  notify: restart oozie
   
 - name: Copy Oozie tomcat config
   copy:
@@ -224,7 +230,7 @@
   file: state=directory path=/var/lib/oozie/webapps/oozie/WEB-INF/lib 
   
 - name:  Download Oozie-SGE 
-  get_url: url={{ item.url }} dest=/var/lib/oozie/webapps/oozie/WEB-INF/lib mode=0555
+  get_url: url={{ item.url }} dest=/usr/lib/oozie/libserver mode=0555
   with_items:
      - { url: 'http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.1/oozie-sge-1.1.jar' }
      - { url: 'http://repo1.maven.org/maven2/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar' }
