@@ -200,7 +200,7 @@
 - name: Copy Oozie config
   copy:
     src: oozie-site.xml
-    dest: /etc/oozie/conf/server.xml
+    dest: /etc/oozie/conf/oozie-site.xml
   notify: restart oozie
   
 - name: Copy Oozie tomcat config
