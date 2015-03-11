@@ -66,6 +66,7 @@
     - { role: seqware-master-infrastructure }
     - { role: seqware-code }
     - { role: seqware-webservice }
+    - { role: glassfish, dbserver: master }
 
 - hosts: worker 
   sudo: True
