@@ -13,14 +13,13 @@
   get_url: url={{ item.url }} dest={{ item.dest }} owner=ubuntu
   with_items:
      - { url: 'http://download.java.net/glassfish/3.1.2.2/release/glassfish-3.1.2.2-unix.sh', dest: '~ubuntu' }
-     - { url: 'http://wrench.res.oicr.on.ca/artifactory/simple/seqware-release/com/github/seqware/seqware-admin-webservice/1.0.14/seqware-admin-webservice-1.0.14.war', dest: '~ubuntu' }
-     - { url: 'https://github.com/SeqWare/seqware/raw/develop/seqware-meta-db/src/main/resources/net/sourceforge/seqware/metadb/util/seqware_meta_db.sql', dest: '~ubuntu' }
-     - { url: 'https://github.com/SeqWare/seqware/raw/develop/seqware-meta-db/src/main/resources/net/sourceforge/seqware/metadb/util/seqware_meta_db_data.sql', dest: '~ubuntu' }
-     - { url: 'https://github.com/SeqWare/seqware/raw/develop/seqware-meta-db/src/main/resources/net/sourceforge/seqware/metadb/util/seqware_meta_db_testdata.sql', dest: '~ubuntu' }
+     - { url: 'http://wrench.res.oicr.on.ca/artifactory/simple/seqware-release/com/github/seqware/seqware-admin-webservice/{{ seqware_version }}/seqware-admin-webservice-{{ seqware_version }}.war', dest: '~ubuntu' }
+     - { url: 'https://raw.githubusercontent.com/SeqWare/seqware/{{ seqware_version }}/seqware-meta-db/src/main/resources/io/seqware/metadb/util/seqware_meta_db.sql', dest: '~ubuntu' }
+     - { url: 'https://raw.githubusercontent.com/SeqWare/seqware/{{ seqware_version }}/seqware-meta-db/src/main/resources/io/seqware/metadb/util/seqware_meta_db_data.sql', dest: '~ubuntu' }
 
 # need to figure out how to refactor this cleanly
 - name:  Register  database relations
-  shell: PGPASSWORD=seqware psql -h dbserver -U seqware seqware_meta_db  --command "\dt"
+  shell: PGPASSWORD=seqware psql -h {{ dbserver }} -U seqware seqware_meta_db  --command "\dt"
   register: database_state
   changed_when: False
 
@@ -29,9 +28,8 @@
   when: "database_state.stdout.find('No relations found.') != -1"
   shell: "{{ item }}"
   with_items: 
-    - PGPASSWORD=seqware psql -h dbserver -U seqware -f ~ubuntu/seqware_meta_db.sql  seqware_meta_db
-    - PGPASSWORD=seqware psql -h dbserver -U seqware -f ~ubuntu/seqware_meta_db_data.sql  seqware_meta_db
-    - PGPASSWORD=seqware psql -h dbserver -U seqware -f ~ubuntu/seqware_meta_db_testdata.sql  seqware_meta_db
+    - PGPASSWORD=seqware psql -h {{ dbserver }} -U seqware -f ~ubuntu/seqware_meta_db.sql  seqware_meta_db
+    - PGPASSWORD=seqware psql -h {{ dbserver }} -U seqware -f ~ubuntu/seqware_meta_db_data.sql  seqware_meta_db
 
 - name: Install Glassfish 
   sudo: yes
@@ -65,7 +63,7 @@
 - name: Expand seqware-admin-webservice
   sudo: yes
   sudo_user: ubuntu
-  command: creates=~ubuntu/seqware-admin-webservice/cc.gif chdir=~ubuntu/seqware-admin-webservice jar -xvf ../seqware-admin-webservice-1.0.14.war
+  command: creates=~ubuntu/seqware-admin-webservice/cc.gif chdir=~ubuntu/seqware-admin-webservice jar -xvf ../seqware-admin-webservice-{{ seqware_version }}.war
 
 - name: Template glassfish-resources
   template: src=glassfish-resources.j2 dest=~ubuntu/seqware-admin-webservice/WEB-INF/glassfish-resources.xml

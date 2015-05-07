@@ -1,0 +1,6 @@
+---
+# file: roles/glassfish/vars/main.yml
+
+seqware_version: "1.0.14"
+dbserver: "dbserver"
+

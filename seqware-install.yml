@@ -66,6 +66,7 @@
     - { role: seqware-master-infrastructure }
     - { role: seqware-code }
     - { role: seqware-webservice }
+    # disable for not, not compatible with build from code - { role: glassfish, dbserver: master }
 
 - hosts: worker 
   sudo: True
