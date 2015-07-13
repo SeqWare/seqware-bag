@@ -292,18 +292,19 @@
   command: exportfs -ra
   when: nfs_setup.changed
   
-- name:  NFS Restart
+- name:  NFS Restart rpcbind
   service: name=rpcbind state=restarted
   when: nfs_setup.changed
   ignore_errors: yes
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty'
 
-- name:  NFS Restart
+- name:  NFS Restart portmap
+  service: name=portmap state=restarted
   when: nfs_setup.changed
   ignore_errors: yes
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'precise'
   
-- name:  NFS Restart
+  - name:  NFS Restart nfs-kernel-server
   service: name=nfs-kernel-server state=restarted
   when: nfs_setup.changed
 
