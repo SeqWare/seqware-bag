@@ -34,17 +34,14 @@
   - name: Determine number of hosts in fugly way
     include: roles/common/tasks/determine_num_hosts.yml
 
-- sudo: True
-  vars:
+- vars:
       shared_storage_system: lvm
       vendor_data: /mnt/seqware-oozie
       lvm_device_whitelist: /dev/xvdd,/dev/xvde
   include: roles/storage/common/tasks/play_deploy_shared_storage.yml
   when: single_node_lvm is defined
 
-- hosts: all
-  sudo: True
-  vars:
+- vars:
       shared_storage_system: glusterfs
       vendor_data: /mnt/seqware-oozie
       glusterfs_version: 3.5
