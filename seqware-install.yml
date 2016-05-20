@@ -34,7 +34,8 @@
   - name: Determine number of hosts in fugly way
     include: roles/common/tasks/determine_num_hosts.yml
 
-- sudo: True
+- hosts: all
+  sudo: True
   vars:
       shared_storage_system: lvm
       vendor_data: /mnt/seqware-oozie
